@@ -1,0 +1,22 @@
+#!/bin/bash
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_1.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_2.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_3.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_4.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_5.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_6.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_7.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_8.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_9.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_10.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_11.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_12.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_13.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_14.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_15.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_16.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_17.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_18.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_19.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/rf_cfm_auto_20.mat
+wget http://bme.elektro.dtu.dk/31545/files/ult_data/simulation/sim_cfm_auto/b_mode.mat
