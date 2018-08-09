@@ -45,6 +45,7 @@ plt.figure()
 plt.imshow(log_compression(env),extent=1000*np.r_[-0.02, 0.02, depths[0], depths[-1]], aspect='auto')
 
 cfmFileTokens = glob.glob(os.path.join(datadir,'rf*.mat'))
+cfmFileTokens = np.sort(cfmFileTokens)
 
 # Sort correctly
 indices = np.hstack([[0,11],np.r_[13:20],np.r_[1:10],12])
@@ -90,7 +91,7 @@ for iLine in range(nLines):
   vel = np.sum(iqdata[:,1:]*np.conj(iqdata[:,:-1]),axis=1)
 
   # Velocity estimate
-  vel = opt.c/(2*np.pi*opt.f0) * opt.fprf/2 * np.angle(vel)
+  vel = opt.c/(2*np.pi*opt.f0) * opt.fprf/2.0 * np.angle(vel)
 
   if opt.discriminator:
     vel = (discriminator > opt.threshold_ratio) * vel
@@ -99,7 +100,7 @@ for iLine in range(nLines):
 
 # Averaging
 if opt.meanfilter:
-  vels = convolve2d(vels,np.ones((3,15))/45,'same')
+  vels = convolve2d(vels,np.ones((3,15))/45.0,'same')
 
 vels = vels.T
 
