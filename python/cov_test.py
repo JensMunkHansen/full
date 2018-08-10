@@ -35,6 +35,7 @@ print "V = \n", principal_axes
 principal_components = X.dot(principal_axes)
 print "Y = \n", principal_components
 
+
 # we now perform singular value decomposition of X
 # "economy size" (or "thin") SVD
 U, s, Vt = la.svd(X, full_matrices=False)
@@ -60,3 +61,10 @@ assert np.allclose(*flip_signs(PC_k, US_k))
 assert U.shape == (n, p)
 assert S.shape == (p, p)
 assert V.shape == (p, p)
+
+# X with some dimensions reduced
+Xfilt_pca = np.dot(PC_k, principal_axes[:,0:k].T)
+
+print "Xfilt = \n", Xfilt_pca
+
+Xfilt_svd = np.dot(US_k, V[:,0:k].T)

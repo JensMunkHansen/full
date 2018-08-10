@@ -74,7 +74,7 @@ for iLine in range(nLines):
   discriminator = np.abs(hilbert(rfdata,axis=0))
 
   if opt.echo:
-    # Echo cancellation (average in slow-time)
+    # Echo cancellation (average in slow-time), TODO(JMH): Improve using FIR or IIR
     rfdata = rfdata - rfdata.mean(axis=1)[:,np.newaxis]
 
   # After echo-cancellation
