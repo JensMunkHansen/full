@@ -20,8 +20,6 @@ opt = dotdict({'c' : 1540.0,
                'fs' : 25e6,
                'f0' : 5e6,
                'fprf' : 10e3,
-               'discriminator' : True,
-               'echo' : True,
                'depth_offset' : 0.03,
                'meanfilter' : True,
                'threshold_ratio' : -20})
@@ -42,7 +40,7 @@ env = np.abs(hilbert(rfdata,axis=0))
 depths = opt.depth_offset + opt.c/(2*opt.fs)*np.arange(rfdata.shape[0])
 
 plt.figure()
-plt.imshow(log_compression(env),extent=1000*np.r_[-0.02, 0.02, depths[-1], depths[0]], aspect='auto')
+plt.imshow(log_compression(env),extent=1000*np.r_[-0.02, 0.02, depths[0], depths[-1]], aspect='auto')
 
 cfmFileTokens = glob.glob(os.path.join(datadir,'rf*.mat'))
 cfmFileTokens = np.sort(cfmFileTokens)
@@ -54,7 +52,7 @@ cfmFileTokens = [ cfmFileTokens[idx] for idx in indices]
 
 rfdata = loadmat(cfmFileTokens[0])['data']
 
-nLines = len(cfmFileTokens)
+nLines            = len(cfmFileTokens)
 nSamples          = rfdata.shape[0]
 nShotsPerEstimate = rfdata.shape[1]
 
@@ -68,35 +66,18 @@ for iLine in range(nLines):
 
 vels = np.zeros((nLines, nSamples))
 
+ueigen = np.r_[1:10]
+
+from numpy import linalg as la
+
 for iLine in range(nLines):
-  rfdata = rfdatas[iLine]
+  rfdata = rfdatas[iLine] # [Fast-time, Slow-time]
 
-  discriminator = np.abs(hilbert(rfdata,axis=0))
-
-  if opt.echo:
-    # Echo cancellation (average in slow-time)
-    rfdata = rfdata - rfdata.mean(axis=1)[:,np.newaxis]
-
-  # After echo-cancellation
-  iqdata = hilbert(rfdata,axis=0)
-
-  if opt.discriminator:
-    # Power ratio (after / before) echo-cancellation
-    discriminator = 20*np.log10(np.abs(iqdata) / discriminator);
-
-    # Averaging over pulses
-    discriminator = discriminator.mean(axis=1);
-
-  # 1D Auto-correlation
-  vel = np.sum(iqdata[:,1:]*np.conj(iqdata[:,:-1]),axis=1)
-
-  # Velocity estimate
-  vel = opt.c/(2*np.pi*opt.f0) * opt.fprf/2.0 * np.angle(vel)
-
-  if opt.discriminator:
-    vel = (discriminator > opt.threshold_ratio) * vel
-
-  vels[iLine,:] = vel
+  u, s, vt = la.svd(rfdata, full_matrices=False)
+  xfilt = np.dot(u[:,ueigen].dot(np.diag(s[ueigen])),vt[ueigen,:])
+  # Perhaps, we need to mult with np.conj
+  #vels[iLine,:] = np.sum(np.abs(xfilt*np.conj(xfilt)), axis=1)
+  vels[iLine,:] = np.sqrt(np.sum(np.abs(xfilt)**2,axis=1))
 
 # Averaging
 if opt.meanfilter:
@@ -105,10 +86,10 @@ if opt.meanfilter:
 vels = vels.T
 
 # Compute depths
-depths = opt.depth_offset + opt.c/(2*opt.fs)*np.arange(iqdata.shape[0])
+depths = opt.depth_offset + opt.c/(2*opt.fs)*np.arange(rfdata.shape[0])
 
 plt.figure()
-plt.imshow(vels,extent=1000*np.r_[-0.02, 0.02, depths[-1], depths[0]],aspect='auto')
+plt.imshow(vels,extent=1000*np.r_[-0.02, 0.02, depths[0], depths[-1]],aspect='auto')
 
 #np.sum(cv[1:]*np.conj())
 

@@ -20,7 +20,6 @@ opt = dotdict({'c' : 1540.0,
                'fs' : 25e6,
                'f0' : 5e6,
                'fprf' : 10e3,
-               'discriminator' : True,
                'echo' : True,
                'depth_offset' : 0.03,
                'meanfilter' : True,
@@ -54,7 +53,7 @@ cfmFileTokens = [ cfmFileTokens[idx] for idx in indices]
 
 rfdata = loadmat(cfmFileTokens[0])['data']
 
-nLines = len(cfmFileTokens)
+nLines            = len(cfmFileTokens)
 nSamples          = rfdata.shape[0]
 nShotsPerEstimate = rfdata.shape[1]
 
@@ -68,35 +67,55 @@ for iLine in range(nLines):
 
 vels = np.zeros((nLines, nSamples))
 
+ueigen = np.r_[1:10]
+
+from numpy import linalg as la
+
 for iLine in range(nLines):
-  rfdata = rfdatas[iLine]
+  rfdata = rfdatas[iLine] # [Fast-time, Slow-time]
 
-  discriminator = np.abs(hilbert(rfdata,axis=0))
+  u, s, vt = la.svd(rfdata, full_matrices=False)
+  xfilt = np.dot(u[:,ueigen].dot(np.diag(s[ueigen])),vt[ueigen,:])
+  rfdatas[iLine,:,:] = xfilt
 
-  if opt.echo:
-    # Echo cancellation (average in slow-time)
-    rfdata = rfdata - rfdata.mean(axis=1)[:,np.newaxis]
+wsize = np.r_[3, 210]
+wstep = np.r_[1, 140]
+# Serious overlap
+wsize = np.r_[3, 100]
+wstep = np.r_[1, 50]
 
-  # After echo-cancellation
-  iqdata = hilbert(rfdata,axis=0)
+shape = np.array(rfdatas.shape)
+old_strides = np.array(rfdatas.strides)
+new_strides = old_strides[0:2] * wstep
+new_strides = np.concatenate((new_strides, old_strides))
 
-  if opt.discriminator:
-    # Power ratio (after / before) echo-cancellation
-    discriminator = 20*np.log10(np.abs(iqdata) / discriminator);
+nwindows = (shape[0:2] - wsize) / wstep
+new_shape = np.concatenate((nwindows,wsize, [nShotsPerEstimate]))
 
-    # Averaging over pulses
-    discriminator = discriminator.mean(axis=1);
+patches = np.lib.stride_tricks.as_strided(rfdatas, shape=new_shape, strides=new_strides)
 
-  # 1D Auto-correlation
-  vel = np.sum(iqdata[:,1:]*np.conj(iqdata[:,:-1]),axis=1)
+(nx,ny) = patches.shape[0:2]
 
-  # Velocity estimate
-  vel = opt.c/(2*np.pi*opt.f0) * opt.fprf/2.0 * np.angle(vel)
+# Adjust overlap
+wmask = 0.5*np.ones(patches.shape[2:4])
+wmask[1:-1,:]  = 1.0
 
-  if opt.discriminator:
-    vel = (discriminator > opt.threshold_ratio) * vel
+vels = np.zeros((nLines, nSamples))
 
-  vels[iLine,:] = vel
+#veigen = np.r_[9]
+#veigen = np.r_[1:9]
+veigen = np.r_[1:10]
+for ix in range(nx):
+  for iy in range(ny):
+    patch = patches[ix,iy,:,:,:].copy()
+    patch = patch.reshape((-1, nShotsPerEstimate))
+    u, s, vt = la.svd(patch, full_matrices=False)
+    xfilt = np.dot(u[:,veigen].dot(np.diag(s[veigen])),vt[veigen,:])
+    vel = np.sqrt(np.sum(np.abs(xfilt)**2,axis=1))
+    xslice = slice(ix*wstep[0], ix*wstep[0] + wsize[0], 1)
+    yslice = slice(iy*wstep[1], iy*wstep[1] + wsize[1], 1)
+    vels[xslice,yslice] = vels[xslice, yslice] + vel.reshape(tuple(wsize)) * wmask
+
 
 # Averaging
 if opt.meanfilter:
@@ -105,10 +124,11 @@ if opt.meanfilter:
 vels = vels.T
 
 # Compute depths
-depths = opt.depth_offset + opt.c/(2*opt.fs)*np.arange(iqdata.shape[0])
+depths = opt.depth_offset + opt.c/(2*opt.fs)*np.arange(rfdata.shape[0])
 
 plt.figure()
 plt.imshow(vels,extent=1000*np.r_[-0.02, 0.02, depths[-1], depths[0]],aspect='auto')
+
 
 #np.sum(cv[1:]*np.conj())
 

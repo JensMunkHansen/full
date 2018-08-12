@@ -68,3 +68,16 @@ Xfilt_pca = np.dot(PC_k, principal_axes[:,0:k].T)
 print "Xfilt = \n", Xfilt_pca
 
 Xfilt_svd = np.dot(US_k, V[:,0:k].T)
+
+# Fast using sklearn
+from sklearn.utils.extmath import randomized_svd
+U, Sigma, VT = randomized_svd(X, n_components=2, n_iter=5, random_state=None)
+# Or svd sparse
+from scipy.sparse.linalg import svds
+u,s,v = svds(X, k=2)
+bla = u.dot(np.diag(s)) # reordered relative to US_k
+
+#from sparsesvd import sparsesvd
+#from scipy.sparse import coo_matrix
+#ut,s,vt = sparsesvd(X.tocsc(), k)
+#projected = (X*ut.T)/s
