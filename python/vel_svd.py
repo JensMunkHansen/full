@@ -67,7 +67,7 @@ for iLine in range(nLines):
 vels = np.zeros((nLines, nSamples))
 
 ueigen = np.r_[1:10]
-
+#ueigen = np.r_[0]
 from numpy import linalg as la
 
 for iLine in range(nLines):
